@@ -222,19 +222,55 @@ RL learns from richer supervision through environment feedback.
 
 \begin{frame}
 \frametitle{Overview of Model-Free RL Methods}
-\begin{minipage}{0.45\textwidth}
-    \centering
-    \begin{itemize}
-        \item \textbf{Critic design:} DQN
-        \item \textbf{Actor design:} DDPG, SAC
-        \item \textbf{Learning signal:} A2C, GAE
-        \item \textbf{Policy update:} TRPO, PPO
-    \end{itemize}
-    \end{minipage}
+	\begin{minipage}{0.55\textwidth}
+	\begin{itemize}
+	\item Policy (Actor): $\pi_\theta(a|s)$ maps state $s$ to action $a$
+	\item Environment: given $a_t$, returns reward $r_t$ and next state $s_{t+1}$
+	\end{itemize}
+
+	\vspace{0.5em}
+	\textbf{Interaction and Learning}
+	\begin{itemize}
+	\item Rollout trajectories: $\tau = (s_0,a_0,r_0,\dots,s_T)$
+	\item Compute return: $G_t = \sum_{k=t}^{T} \gamma^{k-t} r_k$
+	\item Update policy to increase probability of actions with higher return
+	\end{itemize}
+	\end{minipage}
     \hfill
-    \begin{minipage}{0.53\textwidth}
+    \begin{minipage}{0.4\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{imgs/Actor_Critic.png}
+    \includegraphics[width=\textwidth]{imgs/without_critic.png}
+    {\small Actor-Critic Framework}
+    \end{minipage}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Overview of Model-Free RL Methods}
+	\begin{minipage}{0.55\textwidth}
+	\textbf{Limitation of Policy-only Methods}
+
+	\begin{itemize}
+	\item Learning signal = Monte Carlo return $G_t$
+	\item High variance due to delayed and noisy rewards
+	\end{itemize}
+
+	\vspace{0.5em}
+
+	\textbf{Introduce Critic}
+
+	\begin{itemize}
+	\item Critic learns a value function: state value $V(s)$ or action value $Q(s,a)$
+	\item $V(s)$ estimates the expected future reward from state $s$, 
+		and $Q(s,a)$ estimates the expected future reward after taking action $a$ in state $s$
+	\item These value estimates provide a more immediate and less noisy learning signal, guiding the actor to update policy more stably
+	\end{itemize}
+
+	\end{minipage}
+    \hfill
+    \begin{minipage}{0.4\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{imgs/with_critic.png}
     {\small Actor-Critic Framework}
     \end{minipage}
 \end{frame}
@@ -429,8 +465,8 @@ where $a_{t+1}\sim\pi_\phi(\cdot|s_{t+1})$.
     $$
     \mathcal{L}(\alpha) = \mathbb{E}\left[-\alpha\log\pi_\phi(a|s) + \mathcal{H}_\text{target}\right]
     $$
-    to achieve more exploration~(\ie higher $\alpha$) in early training and more exploitation~(\ie lower $\alpha$) in later training.
-
+	adapt $\alpha$ to match target entropy: low entropy $\uparrow \alpha$, high entropy $\downarrow \alpha$
+	
 	\item \textbf{Reparameterized policy:}
 	To enable differentiable and bounded action sampling:
 	\vspace{-1.0em}
